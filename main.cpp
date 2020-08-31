@@ -5,7 +5,7 @@
 /* xcrun clang -g -std=c++2a -fcoroutines-ts -fno-exceptions -lc++ main.cpp */
 
 namespace coro = std::experimental; typedef int ℕ;
-#define co₋await co_await /* Suspend and 'do enter' a caller. A․𝘬․a 'co_ⁱtask' and 'co_op₋schedule'. */
+#define co₋await co_await /* Suspend and 'do enter' a called. A․𝘬․a 'co_ⁱtask' and 'co_op₋schedule'. */
 #define co₋yield co_yield /* Suspend and return result. 𝘊․𝘧 Scandianvian 'förledande': 'co_notify' and 'co_emit'. */
 #define co₋return co_return /* Complete execution and return value. */
 
