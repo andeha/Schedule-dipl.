@@ -1,4 +1,4 @@
-/*  main.cpp | Conversationalism, the occasional interrupt and state possibly-maybe. */
+/*  main.cpp | Conversationalism, the occasional interrupt and state. */
 
 #include <experimental/coroutine>
 
@@ -21,28 +21,25 @@ struct void₋return₁ {
   };
 };
 
-struct int₋return₁ { /* typedef coro::coroutine_handle<promise_type> Handle; 
+struct int₋return₁ {
   
-  Handle coroutine; int₋return₁(Handle routine): coroutine(routine) { } */
-  
-  struct promise_type { int cached=-1; 
+  struct promise_type { int cached=-1;
     auto initial_suspend() { return coro::suspend_never(); }
     auto final_suspend() { return coro::suspend_never(); }
-    /* auto get_return_object() { Handle::from_promise(*this) } */
-    auto get_return_object() { return int₋return₁(cached); }
+    auto /* a.k.a `Handle` */ get_return_object() { return Handle::from_promise(*this); }
     void return_value(int expr) { cached=expr; }
     void unhandled_exception() { /* throw; */ }
     /* Box-expression-before-transmitting-via-yield: */
     auto yield_value(int expr) { cached=expr; return coro::suspend_always(); }
     /* auto yield_value(int₋return₁ expr) { return coro::suspend_never(); } */
-  } inner; /* Submit a coroutine result through this type. */
+  }; /* Submit a coroutine result through this type. */
   
-  int₋return₁(int reference) { inner.cached = reference; }
+  typedef coro::coroutine_handle<promise_type> Handle;
+  Handle coroutine; int₋return₁(Handle routine) : coroutine(routine) { }
   
   constexpr bool await_ready() const noexcept { return true; }
-  constexpr void await_suspend(coro::coroutine_handle<> handle) const noexcept { }
-  /* constexpr ℕ await_resume() const noexcept { return coroutine.promise().cached; } */
-  constexpr ℕ await_resume() const noexcept { return inner.cached; }
+  constexpr void await_suspend(Handle handle) const noexcept { }
+  constexpr ℕ await_resume() const noexcept { return coroutine.promise().cached; }
   /* ⬷ Awaitable concept. */
 };
 
@@ -68,7 +65,7 @@ promise₋Unicodes tamagotchi(void (^tellus)(Unicodes ⁻¹cheek)) { } */
 
 #pragma mark - and the main function:
 
-/* int₋return₁ coroutine₋server() {
+/*  int₋return₁ coroutine₋server() {
   tcpconnection conn = co₋await connect();
   for (;;) { int bytes = co₋await conn.read(); }
   co_return 42;
@@ -82,8 +79,7 @@ main(
 {
    void₋return₁ x = first₋coroutine();
    int₋return₁ y = second₋coroutine();
-   /* printf("returned-y = %d\n", y.coroutine.promise().cached); */
-   printf("returned-y = %d\n", y.inner.cached);
+   printf("returned-y = %d\n", y.coroutine.promise().cached);
    return 0;
 }
 
