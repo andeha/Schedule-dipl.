@@ -5,9 +5,9 @@
 /* xcrun clang -g -std=c++2a -fcoroutines-ts -fno-exceptions -lc++ main.cpp */
 
 namespace coro = std::experimental; typedef int ℕ;
-#define co₋await co_await /* Suspend and 'do enter' a called. A․𝘬․a 'co_ⁱtask' and 'co_op₋schedule'. */
-#define co₋yield co_yield /* Suspend and return result. 𝘊․𝘧 Scandianvian 'förledande': 'co_notify' and 'co_emit'. */
-#define co₋return co_return /* Complete execution and return value. */
+#define co₋await co_await /* Suspend and 'do enter' a called; a․𝘬․a 'co_ⁱtask' and 'co_op₋schedule'. */
+#define feedback co_yield /* Suspend and return result. 𝘊․𝘧 Scandianvian 'förledande': 'co_notify' and 'co_emit'. */
+#define bye co_return /* Complete execution and return value. */
 
 #pragma mark - The 'promise' type and the 'awaitable' type:
 
@@ -26,13 +26,13 @@ struct int₋return₁ {
   struct promise_type { int cached=-1;
     auto initial_suspend() { return coro::suspend_never(); }
     auto final_suspend() { return coro::suspend_never(); }
-    auto /* a.k.a `Handle` */ get_return_object() { return Handle::from_promise(*this); }
+    auto /* a․𝘬․a `Handle` */ get_return_object() { return Handle::from_promise(*this); }
     void return_value(int expr) { cached=expr; }
     void unhandled_exception() { /* throw; */ }
-    /* Box-expression-before-transmitting-via-yield: */
+    /* Boxes-expression-before-transmitting-via-yield ⤐ */
     auto yield_value(int expr) { cached=expr; return coro::suspend_always(); }
     /* auto yield_value(int₋return₁ expr) { return coro::suspend_never(); } */
-  }; /* Submit a coroutine result through this type. */
+  }; /* ⬷ Submit a coroutine result through this type. */
   
   typedef coro::coroutine_handle<promise_type> Handle;
   Handle coroutine; int₋return₁(Handle routine) : coroutine(routine) { }
@@ -49,15 +49,15 @@ int₋return₁
 inner₋coroutine()
 {
    printf("inner-coroutine\n");
-   co₋yield 5; co₋yield 7; co₋yield 9;
-   co₋return 11;
-}
+   feedback 5; feedback 7; feedback 9;
+   bye 11; /* ⬷ See also `🏁🅽` and `🏁₁` and the abstraction `fend`. */
+} /* ...also semantically-speaking 'mandatory' and 'not optional'. */
 
 int₋return₁ second₋coroutine()
 {
    printf("second-coroutine\n");
-   for (int i=0; i<4; ++i) { ℕ y = co₋await inner₋coroutine(); printf("yield-y = %d\n", y); }
-   co₋return 13;
+   for (int i=0; i<4; ++i) { ℕ y = co₋await inner₋coroutine(); printf("y-from-yield = %d\n", y); }
+   bye 13;
 }
 
 /* promise₋const₋char₋⁑ tamagotchi() { }
@@ -79,8 +79,8 @@ main(
 {
    void₋return₁ x = first₋coroutine();
    int₋return₁ y = second₋coroutine();
-   printf("returned-y = %d\n", y.coroutine.promise().cached);
+   printf("y = %d\n", y.coroutine.promise().cached);
    return 0;
-}
+} /* ⬷ Reconsider `main` as co-routine and further 'cooperative'. */
 
 
