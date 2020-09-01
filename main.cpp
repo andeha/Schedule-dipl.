@@ -31,7 +31,10 @@ struct int₋return₁ {
     void unhandled_exception() { /* throw; */ }
     /* Boxes-expression-before-transmitting-via-yield ⤐ */
     auto yield_value(int expr) { cached=expr; return coro::suspend_always(); }
-    /* auto yield_value(int₋return₁ expr) { return coro::suspend_never(); } */
+    auto yield_value(double expr) { int neg = expr < +0.0 ? 1 : 0; 
+      double expr₂ = neg ? -expr : expr; cached=/*⌊*/(expr₂+0.5)/*⌋*/;
+      if (neg) { cached = -cached; }
+      return coro::suspend_always(); }
   }; /* ⬷ Submit a coroutine result through this type. */
   
   typedef coro::coroutine_handle<promise_type> Handle;
@@ -49,7 +52,7 @@ int₋return₁
 inner₋coroutine()
 {
    printf("inner-coroutine\n");
-   feedback 5; feedback 7; feedback 9;
+   feedback 5; feedback 7.0; feedback 9;
    bye 11; /* ⬷ See also `🏁🅽` and `🏁₁` and the abstraction `fend`. */
 } /* ...also semantically-speaking 'mandatory' and 'not optional'. */
 
