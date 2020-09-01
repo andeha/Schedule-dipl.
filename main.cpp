@@ -43,7 +43,7 @@ struct int₋return₁ {
   /* ⬷ Awaitable concept. */
 };
 
-void₋return₁ first₋coroutine() { printf("first-coroutine\n"); co_return; }
+void₋return₁ first₋coroutine() { printf("first-coroutine\n"); bye; }
 
 int₋return₁
 inner₋coroutine()
@@ -68,7 +68,7 @@ promise₋Unicodes tamagotchi(void (^tellus)(Unicodes ⁻¹cheek)) { } */
 /*  int₋return₁ coroutine₋server() {
   tcpconnection conn = co₋await connect();
   for (;;) { int bytes = co₋await conn.read(); }
-  co_return 42;
+  bye 42;
 } */
 
 int
