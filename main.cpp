@@ -42,7 +42,8 @@ struct int₋return₁ {
   
   constexpr bool await_ready() const noexcept { return true; }
   constexpr void await_suspend(Handle handle) const noexcept { }
-  constexpr ℕ await_resume() const noexcept { return coroutine.promise().cached; }
+  /* constexpr ℕ await_resume() const noexcept { return coroutine.promise().cached; } */
+  int₋return₁ await_resume() const noexcept { return int₋return₁(coroutine); }
   /* ⬷ Awaitable concept. */
 };
 
@@ -59,7 +60,19 @@ inner₋coroutine()
 int₋return₁ second₋coroutine()
 {
    printf("second-coroutine\n");
-   for (int i=0; i<4; ++i) { ℕ y = co₋await inner₋coroutine(); printf("y-from-yield = %d\n", y); }
+   
+   auto retrieved = ^(int₋return₁& y) { return y.coroutine.promise().cached; };
+   
+   int₋return₁ y = co₋await inner₋coroutine();
+   printf("y-from-yield = %d\n", retrieved(y));
+   for (int i=0; i<4-1; ++i) {
+     __builtin_coro_resume(y.coroutine.address());
+     printf("y-from-yield = %d\n", retrieved(y));
+   }
+   
+   /* for (int i=0; i<4; ++i) { ℕ y = co₋await inner₋coroutine(); 
+     printf("y-from-yield = %d\n", y); } */
+   
    bye 13;
 }
 
