@@ -1,13 +1,18 @@
 /*  main.cpp | Conversationalism, the occasional interrupt and state. */
 
+/* #include <Twinbeam.h> */
 #include <experimental/coroutine>
+namespace coro = std::experimental;
+#include <stdio.h>
 
-/* xcrun clang -g -std=c++2a -fcoroutines-ts -fno-exceptions -lc++ main.cpp */
+/* xcrun clang -g -std=c++2a -fcoroutines-ts -fno-exceptions -fno-rtti       \
+  -fblocks -iwithsysroot ../Apps/ -lc++ main.cpp */
 
-namespace coro = std::experimental; typedef int ℕ;
 #define co₋await co_await /* Suspend and 'do enter' a called; a․𝘬․a 'co_ⁱtask' and 'co_op₋schedule'. */
 #define feedback co_yield /* Suspend and return result. 𝘊․𝘧 Scandianvian 'förledande': 'co_notify' and 'co_emit'. */
 #define bye co_return /* Complete execution and return value. */
+
+typedef int ℕ;
 
 #pragma mark - The 'promise' type and the 'awaitable' type:
 
@@ -23,10 +28,10 @@ struct void₋return₁ {
 
 struct int₋return₁ {
   
-  struct promise_type { int cached=-1;
-    auto initial_suspend() { return coro::suspend_never(); }
-    auto final_suspend() { return coro::suspend_never(); }
-    auto /* a․𝘬․a `Handle` */ get_return_object() { return Handle::from_promise(*this); }
+  struct promise_type { int cached=-1; /* Further - when `yield_value` returns `suspend_never` - investigate 'int cached[]'. */
+    auto initial_suspend() { return coro::suspend_never(); } /* When coroutine is called and after 'co-await'. */
+    auto final_suspend() { return coro::suspend_never(); } /* After 'co-return'. */
+    auto /* a․𝘬․a `Handle` */ get_return_object() { return Waiver::from_promise(*this); }
     void return_value(int expr) { cached=expr; }
     void unhandled_exception() { /* throw; */ }
     /* Boxes-expression-before-transmitting-via-yield ⤐ */
@@ -37,11 +42,11 @@ struct int₋return₁ {
       return coro::suspend_always(); }
   }; /* ⬷ Submit a coroutine result through this type. */
   
-  typedef coro::coroutine_handle<promise_type> Handle;
-  Handle coroutine; int₋return₁(Handle routine) : coroutine(routine) { }
+  typedef std::experimental::coroutine_handle<promise_type> Waiver;
+  Waiver coroutine; int₋return₁(Waiver routine) : coroutine(routine) { }
   
   constexpr bool await_ready() const noexcept { return true; }
-  constexpr void await_suspend(Handle handle) const noexcept { }
+  constexpr void await_suspend(Waiver handle) const noexcept { /* handle.resume(); */ }
   /* constexpr ℕ await_resume() const noexcept { return coroutine.promise().cached; } */
   int₋return₁ await_resume() const noexcept { return int₋return₁(coroutine); }
   /* ⬷ Awaitable concept. */
@@ -98,5 +103,4 @@ main(
    printf("y = %d\n", y.coroutine.promise().cached);
    return 0;
 } /* ⬷ Reconsider `main` as co-routine and further 'cooperative'. */
-
 
